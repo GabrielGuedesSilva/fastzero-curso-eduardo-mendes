@@ -21,3 +21,9 @@ class UserPublic(BaseModel):
 
 class UserList(BaseModel):
     users: list[UserPublic]
+
+
+class Token(BaseModel):
+    token_type: str  # modelo que o cliente deve usar para autorização
+    access_token: str  # token jwt que será gerado
+    model_config = ConfigDict(from_attributes=True)

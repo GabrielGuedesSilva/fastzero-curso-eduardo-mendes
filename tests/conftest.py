@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from fastzero.app import app
 from fastzero.database import get_session
 from fastzero.models import User, table_registry
+from fastzero.security import get_password_hash
 
 
 # Arrange
@@ -43,8 +44,25 @@ def session():
 
 @pytest.fixture
 def user(session):
-    user = User(username='test user', email='test@email.com', password='12345')
+    pwd = 'senhateste'
+    user = User(
+        username='test user',
+        email='test@email.com',
+        password=get_password_hash(pwd),
+    )
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    user.clean_password = pwd
+
     return user
+
+
+@pytest.fixture
+def token(client, user):
+    response = client.post(
+        '/token',
+        data={'username': user.email, 'password': user.clean_password},
+    )
+    return response.json()['access_token']
