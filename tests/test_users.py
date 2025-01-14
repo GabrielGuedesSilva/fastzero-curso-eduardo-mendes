@@ -25,7 +25,7 @@ def test_create_user_username_already_exists(client, user):
     response = client.post(
         '/users/',
         json={
-            'username': 'test user',
+            'username': user.username,
             'email': 'test@email.com',
             'password': '12345',
         },
@@ -42,7 +42,7 @@ def test_create_user_email_already_exists(client, user):
         '/users/',
         json={
             'username': 'test user 2',
-            'email': 'test@email.com',
+            'email': user.email,
             'password': '12345',
         },
     )  # Act
@@ -93,8 +93,8 @@ def test_get_user_by_id(client, user):
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'id': user.id,
-        'username': 'test user',
-        'email': 'test@email.com',
+        'username': user.username,
+        'email': user.email,
     }
 
 
@@ -114,34 +114,9 @@ def test_delete_user(client, user, token):
     assert response.status_code == HTTPStatus.NO_CONTENT
 
 
-# def test_update_user_not_found(client, token):
-#     response = client.put(
-#         '/users/2',
-#         headers={'Authorization': f'Bearer {token}'},
-#         json={
-#             'username': 'TESTE UPDATE',
-#             'email': 'teste@email.com',
-#             'password': '12345',
-#         },
-#     )
-
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
-
-
-# def test_delete_user_not_found(client, token):
-#     response = client.delete(
-#         '/users/2',
-#         headers={'Authorization': f'Bearer {token}'},
-#     )
-
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
-
-
-def test_update_wrong_user(client, user, token):
+def test_update_wrong_user(client, user2, token):
     response = client.put(
-        f'/users/{user.id + 1}',
+        f'/users/{user2.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'TESTE UPDATE',
@@ -154,9 +129,9 @@ def test_update_wrong_user(client, user, token):
     assert response.json() == {'detail': 'Not enough permissions'}
 
 
-def test_delete_wrong_user(client, user, token):
+def test_delete_wrong_user(client, user2, token):
     response = client.delete(
-        f'/users/{user.id + 1}',
+        f'/users/{user2.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
 

@@ -1,3 +1,4 @@
+import factory
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -8,6 +9,15 @@ from fastzero.app import app
 from fastzero.database import get_session
 from fastzero.models import User, table_registry
 from fastzero.security import get_password_hash
+
+
+class UserFactory(factory.Factory):
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: f'test{n}')
+    email = factory.LazyAttribute(lambda obj: f'{obj.username}@test.com')
+    password = factory.LazyAttribute(lambda obj: f'senha-{obj.username}')
 
 
 # Arrange
@@ -45,9 +55,22 @@ def session():
 @pytest.fixture
 def user(session):
     pwd = 'senhateste'
-    user = User(
-        username='test user',
-        email='test@email.com',
+    user = UserFactory(
+        password=get_password_hash(pwd),
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    user.clean_password = pwd
+
+    return user
+
+
+@pytest.fixture
+def user2(session):
+    pwd = 'senhateste'
+    user = UserFactory(
         password=get_password_hash(pwd),
     )
     session.add(user)
