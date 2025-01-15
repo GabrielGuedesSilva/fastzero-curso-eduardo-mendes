@@ -56,3 +56,6 @@ run = 'fastapi dev fastzero/app.py'
 pre_test = 'task lint'
 test = 'pytest -s -x --cov=fastzero -vv --showlocals --tb=long'
 post_test = 'coverage html'
+
+[tool.ruff.lint.pylint]
+max-args = 10

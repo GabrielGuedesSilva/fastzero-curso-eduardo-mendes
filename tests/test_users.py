@@ -1,23 +1,27 @@
 from http import HTTPStatus
 
+from fastzero.models import User
 from fastzero.schemas import UserPublic
 
 
-def test_create_user(client):
-    response = client.post(
-        '/users/',
-        json={
-            'username': 'name user',
-            'email': 'john@email.com',
-            'password': '12345',
-        },
-    )  # Act
+def test_create_user(client, mock_db_time):
+    with mock_db_time(model=User) as time:
+        response = client.post(
+            '/users/',
+            json={
+                'username': 'name user',
+                'email': 'john@email.com',
+                'password': '12345',
+            },
+        )  # Act
 
     assert response.status_code == HTTPStatus.CREATED  # Assert
     assert response.json() == {
         'id': 1,
         'username': 'name user',
         'email': 'john@email.com',
+        'created_at': time.isoformat(),
+        'updated_at': time.isoformat(),
     }  # Assert
 
 
@@ -64,6 +68,9 @@ def test_get_users_with_users_registered(client, user):
     user_schema = UserPublic.model_validate(user).model_dump()
     response = client.get('/users/')  # Act
 
+    user_schema['created_at'] = user.created_at.isoformat()
+    user_schema['updated_at'] = user.updated_at.isoformat()
+
     assert response.status_code == HTTPStatus.OK  # Assert
     assert response.json() == {'users': [user_schema]}  # Assert
 
@@ -84,6 +91,8 @@ def test_update_user(client, user, token):
         'id': user.id,
         'username': 'TESTE UPDATE',
         'email': 'teste@email.com',
+        'created_at': user.created_at.isoformat(),
+        'updated_at': user.updated_at.isoformat(),
     }
 
 
@@ -95,6 +104,8 @@ def test_get_user_by_id(client, user):
         'id': user.id,
         'username': user.username,
         'email': user.email,
+        'created_at': user.created_at.isoformat(),
+        'updated_at': user.updated_at.isoformat(),
     }
 
 
