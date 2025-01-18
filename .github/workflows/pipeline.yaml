@@ -6,7 +6,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Instalar o pthon
+    - name: Instalar o Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
+      
+    - name: Instalar o Poetry
+      run: pipx install poetry
+
+    - name: Instalar Dependências
+      run: poetry install
+
+    - name: Executar Testes
+      run: poetry run task test
