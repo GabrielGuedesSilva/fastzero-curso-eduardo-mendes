@@ -16,7 +16,8 @@ dependencies = [
     "python-multipart (>=0.0.20,<0.0.21)",
     "pyjwt (>=2.10.1,<3.0.0)",
     "pytest-asyncio (>=0.25.2,<0.26.0)",
-    "freezegun (>=1.5.1,<2.0.0)"
+    "freezegun (>=1.5.1,<2.0.0)",
+    "psycopg[binary] (>=3.2.4,<4.0.0)"
 ]
 
 [build-system]
@@ -28,6 +29,7 @@ ruff = "^0.8.6"
 pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
 taskipy = "^1.14.1"
+testcontainers = "^4.9.0"
 
 
 [tool.poetry.group.deve.dependencies]
@@ -54,7 +56,7 @@ lint = 'ruff check .; ruff check . --diff'
 format = 'ruff check . --fix; ruff format .'
 run = 'fastapi dev fastzero/app.py'
 pre_test = 'task lint'
-test = 'pytest -s -x --cov=fastzero -vv --showlocals --tb=long'
+test = 'pytest -x --cov=fastzero -vv --showlocals --tb=long'
 post_test = 'coverage html'
 
 [tool.ruff.lint.pylint]

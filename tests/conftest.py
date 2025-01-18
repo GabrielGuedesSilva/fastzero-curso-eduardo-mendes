@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
 from fastzero.app import app
 from fastzero.database import get_session
@@ -47,20 +47,24 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
-def session():
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:16', driver='psycopg') as postgres:
+        _engine = create_engine(postgres.get_connection_url())
 
+        with _engine.begin():
+            yield _engine
+
+
+@pytest.fixture
+def session(engine):
     # Cria todas as definicções do banco e depois apaga tudo
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
-        # yield faz com que a função pare na linha abaixo retornando a session,
-        # depois que o teste terminar, o código abaixo do yield é executado
+        # yield faz com que a função pare na linha abaixo retornando
+        # a session, depois que o teste terminar
+        # o código abaixo do yield é executado
         yield session
 
     table_registry.metadata.drop_all(engine)
